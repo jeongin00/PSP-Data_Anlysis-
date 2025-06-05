@@ -66,14 +66,14 @@
     <input type="hidden" id="holiday" name="holiday">
 
     <button type="submit">위험도 예측</button>
+    <h3 id="result"></h3>
+    <p id="weather-info"></p>
     <p id="day-message"></p> <!-- 요일 안내 -->
     <label>지하철 역명:
     <input type="text" id="station" name="station" placeholder="역명을 입력하세요" list="station-list" autocomplete="off">
     <datalist id="station-list"></datalist>
   </label><br><br>
   </form>
-  <h3 id="result"></h3>
-  <p id="weather-info"></p>
   <p id="subway-info"></p>
   <script>
     const holidayMap = {
@@ -101,7 +101,6 @@
       const dayName = getDayName(selectedDate);
       document.getElementById("day").value = dayName;
       document.getElementById("holiday").value = getHoliday(selectedDate);
-      document.getElementById("day-message").innerText = `${dayName}날 약속이 있으시군요!`;
     });
 
     document.getElementById("predict-form").addEventListener("submit", async function (e) {
@@ -114,7 +113,6 @@
         gu: formData.get("gu"),
         mbti: formData.get("mbti"),
         holiday: formData.get("holiday"),    // 자동 설정된 기념일
-        station: formData.get("station")  // 🔹 추가된 부분
       };
 
       const res = await fetch("/predict", {
@@ -124,6 +122,8 @@
       });
 
       const result = await res.json();
+      // ✅ 이때 요일 메시지를 보여준다
+      document.getElementById("day-message").innerText = `${data.day}날 약속이 있으시군요!`;
       
     // 예측 등급
     document.getElementById("result").innerText = result.grade
@@ -156,6 +156,24 @@
           option.value = station;
           datalist.appendChild(option);
         });
+      }
+    });
+    document.getElementById("station").addEventListener("keydown", async function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const station = this.value.trim();
+        const day = document.getElementById("day").value;
+
+        if (!station) return;
+
+        const res = await fetch("/congestion", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ station, day })
+        });
+
+        const result = await res.json();
+        document.getElementById("subway-info").innerText = result.message || "정보 없음";
       }
     });
 
