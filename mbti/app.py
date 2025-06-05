@@ -60,7 +60,7 @@ def get_pref(user_mbti, target_mbti, gender):
     prefs = male_pref if gender == "MALE" else female_pref
     return prefs[user_mbti][target_mbti]
 
-def calculate_match_score(m1, g1, m2, g2):
+def calculate_match_success(m1, g1, m2, g2):
     p1 = get_pref(m1, m2, g1)
     p2 = get_pref(m2, m1, g2)
     return round(min(p1, p2), 2)
@@ -73,10 +73,26 @@ def index():
         their_mbti = request.form.get("their_mbti")
         their_gender = request.form.get("their_gender")
 
-        score = calculate_match_score(my_mbti, my_gender, their_mbti, their_gender)
-        return render_template("index.html", score=score, show_result=True)
-
-    return render_template("index.html", show_result=False)
+        success = calculate_match_success(my_mbti, my_gender, their_mbti, their_gender)
+        return render_template(
+            "index.html",
+            success=success,
+            show_result=True,
+            my_mbti=my_mbti,
+            my_gender=my_gender,
+            their_mbti=their_mbti,
+            their_gender=their_gender
+        )
+     # ✅ GET 요청 처리 추가 (폼 초기 상태로 렌더링)
+    return render_template(
+        "index.html",
+        success=None,
+        show_result=False,
+        my_mbti="",
+        my_gender="",
+        their_mbti="",
+        their_gender=""
+    )
 
 @app.route("/feedback", methods=["POST"])
 def feedback():
@@ -84,11 +100,11 @@ def feedback():
     my_gender = request.form["my_gender"]
     their_mbti = request.form["their_mbti"]
     their_gender = request.form["their_gender"]
-    feedback_score  = int(request.form["success"]) 
+    feedback_success  = int(request.form["success"]) 
 
     # 양방향 가중치 업데이트
-    update_pref(my_mbti, their_mbti, my_gender,  feedback_score )
-    update_pref(their_mbti, my_mbti, their_gender,  feedback_score )
+    update_pref(my_mbti, their_mbti, my_gender,  feedback_success )
+    update_pref(their_mbti, my_mbti, their_gender,  feedback_success )
 
     return "<h3>피드백 감사합니다! 가중치가 반영되었습니다.</h3><a href='/'>← 돌아가기</a>"
 
