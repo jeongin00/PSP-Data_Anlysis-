@@ -88,29 +88,10 @@ def predict():
             pred = output.argmax(dim=1).item()
             grade = le["등급"].inverse_transform([pred])[0]
             
-
-        # 🔹 5. 지하철 혼잡도 분석
-        station = data.get("station", "").strip()
-        subway_row = df_subway[(df_subway["요일"] == day) & (df_subway["역명"] == station)]
-        congestion_message = "혼잡도 정보 없음"
-        if not subway_row.empty:
-            # 시간대별 혼잡도 점수
-            time_slots = ['새벽', '출근', '오전', '점심', '오후', '퇴근', '저녁', '심야']
-            values = subway_row.iloc[0][time_slots].values.astype(float)
-
-            min_idx = values.argmin()
-            max_idx = values.argmax()
-
-            congestion_message = (
-                f"가장 한산한 시간대는 '{time_slots[min_idx]}', "
-                f"가장 혼잡한 시간대는 '{time_slots[max_idx]}'입니다."
-            )
-
         return jsonify({
             "grade": grade,
             "weather": weather_status,  # 예: "Clouds", "Clear", "Rain"
             "temperature": round(temperature, 1),  # 소수점 1자리
-            "subway": congestion_message  # 🔹 지하철 혼잡도 결과
         })
 
     except Exception as e:
@@ -126,6 +107,25 @@ def get_stations():
         return jsonify({"stations": stations})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+@app.route("/congestion", methods=["POST"])
+def congestion():
+    data = request.get_json()
+    station = (data.get("station") or "").strip()
+    day = data.get("day")
+
+    df = pd.read_csv("지하철.csv")
+    row = df[(df["역명"] == station) & (df["요일"] == day)]
+
+    if row.empty:
+        return jsonify({"message": "혼잡도 정보 없음"})
+
+    time_slots = ['새벽', '출근', '오전', '점심', '오후', '퇴근', '저녁', '심야']
+    values = row.iloc[0][time_slots].values.astype(float)
+    min_idx, max_idx = values.argmin(), values.argmax()
+
+    return jsonify({
+        "message": f"가장 한산한 시간대는 '{time_slots[min_idx]}', 가장 혼잡한 시간대는 '{time_slots[max_idx]}'입니다."
+    })
 
 
 if __name__ == "__main__":
