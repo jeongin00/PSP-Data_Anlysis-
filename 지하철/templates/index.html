@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>데이트 위험도 예측</title>
+</head>
+<body>
+  <h2>데이트 위험도 예측기</h2>
+
+  <form id="predict-form">
+    <label>날짜:
+      <input type="date" id="date" name="date">
+    </label><br><br>
+
+    <label>구:
+      <select name="gu" id="gu">
+        <option>강남구</option>
+        <option>강동구</option>
+        <option>강북구</option>
+        <option>강서구</option>
+        <option>관악구</option>
+        <option>광진구</option>
+        <option>구로구</option>
+        <option>금천구</option>
+        <option>노원구</option>
+        <option>도봉구</option>
+        <option>동작구</option>
+        <option>마포구</option>
+        <option>서대문구</option>
+        <option>서초구</option>
+        <option>성동구</option>
+        <option>송파구</option>
+        <option>양천구</option>
+        <option>용산구</option>
+        <option>은평구</option>
+        <option>종로구</option>
+        <option>중구</option>
+        <option>중랑구</option>
+      </select>
+    </label><br><br>
+
+    <label>MBTI:
+    <select name="mbti">
+        <option>INFP</option>
+        <option>INFJ</option>
+        <option>ISFP</option>
+        <option>ISFJ</option>
+        <option>INTP</option>
+        <option>INTJ</option>
+        <option>ISTP</option>
+        <option>ISTJ</option>
+
+        <option>ENFP</option>
+        <option>ENFJ</option>
+        <option>ESFP</option>
+        <option>ESFJ</option>
+        <option>ENTP</option>
+        <option>ENTJ</option>
+        <option>ESTP</option>
+        <option>ESTJ</option>
+    </select>
+    </label><br><br>
+
+    <!-- 숨겨진 필드: 자동 계산된 요일 및 기념일 -->
+    <input type="hidden" id="day" name="day">
+    <input type="hidden" id="holiday" name="holiday">
+
+    <button type="submit">위험도 예측</button>
+    <p id="day-message"></p> <!-- 요일 안내 -->
+    <label>지하철 역명:
+    <input type="text" id="station" name="station" placeholder="역명을 입력하세요" list="station-list" autocomplete="off">
+    <datalist id="station-list"></datalist>
+  </label><br><br>
+  </form>
+  <h3 id="result"></h3>
+  <p id="weather-info"></p>
+  <p id="subway-info"></p>
+  <script>
+    const holidayMap = {
+      "02-14": "발렌타인데이",
+      "03-01": "삼일절",
+      "05-05": "어린이날",
+      "06-06": "현충일",
+      "12-24": "크리스마스이브",
+      "12-25": "크리스마스"
+    };
+
+    function getDayName(dateStr) {
+      const days = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+      const date = new Date(dateStr);
+      return days[date.getDay()];
+    }
+
+    function getHoliday(dateStr) {
+      const mmdd = dateStr.slice(5);
+      return holidayMap[mmdd] || "기타";
+    }
+
+    document.getElementById("date").addEventListener("change", function () {
+      const selectedDate = this.value;
+      const dayName = getDayName(selectedDate);
+      document.getElementById("day").value = dayName;
+      document.getElementById("holiday").value = getHoliday(selectedDate);
+      document.getElementById("day-message").innerText = `${dayName}날 약속이 있으시군요!`;
+    });
+
+    document.getElementById("predict-form").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+      const data = {
+        date: formData.get("date"),         // 🔹 날짜 (날씨용)
+        day: formData.get("day"),           // 자동 설정된 요일
+        gu: formData.get("gu"),
+        mbti: formData.get("mbti"),
+        holiday: formData.get("holiday"),    // 자동 설정된 기념일
+        station: formData.get("station")  // 🔹 추가된 부분
+      };
+
+      const res = await fetch("/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.json();
+      
+    // 예측 등급
+    document.getElementById("result").innerText = result.grade
+    ? `예측 등급: ${result.grade}`
+    : `오류: ${result.error}`;
+
+    // 🔹 날씨와 온도 정보 추가 출력
+    if (result.weather && result.temperature !== undefined) {
+    document.getElementById("weather-info").innerText =
+        `날씨: ${result.weather}, 온도: ${result.temperature}°C`;
+    } else {
+    document.getElementById("weather-info").innerText = "";
+    }
+    // 🔹 지하철 혼잡도 정보 출력
+    if (result.subway) {
+      document.getElementById("subway-info").innerText = result.subway;
+    } else {
+      document.getElementById("subway-info").innerText = "";
+    }
+    });
+    // 페이지 로드 시 서버에서 역명 리스트 불러오기
+    window.addEventListener("DOMContentLoaded", async () => {
+      const res = await fetch("/stations");
+      const result = await res.json();
+
+      if (result.stations) {
+        const datalist = document.getElementById("station-list");
+        result.stations.forEach(station => {
+          const option = document.createElement("option");
+          option.value = station;
+          datalist.appendChild(option);
+        });
+      }
+    });
+
+  </script>
+</body>
+</html>
