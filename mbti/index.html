@@ -42,10 +42,10 @@
   <button type="submit">궁합 보기</button>
 </form>
   {% if show_result %}
-    <h3>궁합 점수: {{ score }} / 1.0</h3>
-    {% if score >= 0.7 %}
+    <h3>궁합 점수: {{ success }} / 1.0</h3>
+    {% if success >= 0.7 %}
       <p>❤️ 정말 잘 맞는 궁합이에요!</p>
-    {% elif score >= 0.5 %}
+    {% elif success >= 0.5 %}
       <p>😊 무난한 궁합입니다.</p>
     {% else %}
       <p>🤔 약간 노력 필요한 조합일 수도 있어요.</p>
