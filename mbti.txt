@@ -1,0 +1,77 @@
+MBTI_WEIGHTS = {
+    "INFP":  {"emotion": 1.4, "crowd": 1.3, "plan": 0.9},
+    "INFJ":  {"emotion": 1.3, "crowd": 1.3, "plan": 1.2},
+    "ISFP":  {"emotion": 1.3, "crowd": 1.2, "plan": 0.9},
+    "ISFJ":  {"emotion": 1.3, "crowd": 1.2, "plan": 1.2},
+    "INTP":  {"emotion": 0.9, "crowd": 1.2, "plan": 0.9},
+    "INTJ":  {"emotion": 0.9, "crowd": 1.1, "plan": 1.3},
+    "ISTP":  {"emotion": 0.9, "crowd": 1.1, "plan": 0.9},
+    "ISTJ":  {"emotion": 0.9, "crowd": 1.2, "plan": 1.3},
+
+    "ENFP":  {"emotion": 1.3, "crowd": 0.9, "plan": 0.9},
+    "ENFJ":  {"emotion": 1.3, "crowd": 1.0, "plan": 1.2},
+    "ESFP":  {"emotion": 1.2, "crowd": 0.8, "plan": 0.8},
+    "ESFJ":  {"emotion": 1.3, "crowd": 0.9, "plan": 1.1},
+    "ENTP":  {"emotion": 0.9, "crowd": 0.9, "plan": 0.9},
+    "ENTJ":  {"emotion": 0.8, "crowd": 0.9, "plan": 1.3},
+    "ESTP":  {"emotion": 0.9, "crowd": 0.8, "plan": 0.9},
+    "ESTJ":  {"emotion": 0.9, "crowd": 0.9, "plan": 1.3}
+}
+
+
+
+
+
+weather_score_table = {
+    "Clear": 100,
+    "Clouds": 90,
+    "Drizzle": 70,
+    "Rain": 60,
+    "Thunderstorm": 40,
+    "Snow": 65,
+    "Mist": 60,
+    "Fog": 60,
+    "Haze": 60,
+    "Smoke": 50,
+    "Dust": 50,
+    "Ash": 40,
+    "Sand": 45,
+    "Squall": 30,
+    "Tornado": 10,
+}
+
+holiday_emotion_map = {
+    "크리스마스": 1.3,
+    "크리스마스이브": 1.2,
+    "발렌타인데이": 1.4,
+    "화이트데이": 1.3,
+    "삼일절": 0.8,
+    "현충일": 0.8,
+    "기타": 1.0
+}
+
+
+
+구목록
+강남구
+강동구
+강북구
+강서구
+관악구
+광진구
+구로구
+금천구
+노원구
+도봉구
+동작구
+마포구
+서대문구
+서초구
+성동구
+송파구
+양천구
+용산구
+은평구
+종로구
+중구
+중랑구
