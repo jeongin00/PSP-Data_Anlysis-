@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>MBTI 궁합 계산기</title>
+</head>
+<body>
+<h2>MBTI 궁합 점수 계산</h2>
+<form method="POST">
+  <label>나의 MBTI:
+    <select name="my_mbti">
+      {% for mbti in ["INFP", "INFJ", "ENFP", "ENFJ", "INTP", "INTJ", "ENTP", "ENTJ", 
+                      "ISFP", "ISFJ", "ESFP", "ESFJ", "ISTP", "ISTJ", "ESTP", "ESTJ"] %}
+      <option value="{{ mbti }}">{{ mbti }}</option>
+      {% endfor %}
+    </select>
+  </label><br><br>
+
+  <label>나의 성별:
+    <select name="my_gender">
+      <option value="MALE">남성</option>
+      <option value="FEMALE">여성</option>
+    </select>
+  </label><br><br>
+
+  <label>상대 MBTI:
+    <select name="their_mbti">
+      {% for mbti in ["INFP", "INFJ", "ENFP", "ENFJ", "INTP", "INTJ", "ENTP", "ENTJ", 
+                      "ISFP", "ISFJ", "ESFP", "ESFJ", "ISTP", "ISTJ", "ESTP", "ESTJ"] %}
+      <option value="{{ mbti }}">{{ mbti }}</option>
+      {% endfor %}
+    </select>
+  </label><br><br>
+
+  <label>상대 성별:
+    <select name="their_gender">
+      <option value="MALE">남성</option>
+      <option value="FEMALE">여성</option>
+    </select>
+  </label><br><br>
+
+  <button type="submit">궁합 보기</button>
+</form>
+  {% if show_result %}
+    <h3>궁합 점수: {{ success }} / 1.0</h3>
+    {% if success >= 0.7 %}
+      <p>❤️ 정말 잘 맞는 궁합이에요!</p>
+    {% elif success >= 0.5 %}
+      <p>😊 무난한 궁합입니다.</p>
+    {% else %}
+      <p>🤔 약간 노력 필요한 조합일 수도 있어요.</p>
+    {% endif %}
+
+    <!-- ✅ 피드백 폼 추가 -->
+  <form method="POST" action="/feedback">
+    <input type="hidden" name="my_mbti" value="{{ my_mbti }}">
+    <input type="hidden" name="my_gender" value="{{ my_gender }}">
+    <input type="hidden" name="their_mbti" value="{{ their_mbti }}">
+    <input type="hidden" name="their_gender" value="{{ their_gender }}">
+
+    <p>만남은 어땠나요?</p>
+    <label><input type="radio" name="success" value="5"> 😍 최고예요</label><br>
+    <label><input type="radio" name="success" value="4"> 😊 꽤 좋아요</label><br>
+    <label><input type="radio" name="success" value="3"> 😐 보통이에요</label><br>
+    <label><input type="radio" name="success" value="2"> 😕 별로였어요</label><br>
+    <label><input type="radio" name="success" value="1"> 😡 최악이에요</label><br><br>
+
+    <button type="submit">피드백 제출</button>
+  </form>
+  {% endif %}
+</body>
+</html>

@@ -109,4 +109,4 @@ def feedback():
     return "<h3>피드백 감사합니다! 가중치가 반영되었습니다.</h3><a href='/'>← 돌아가기</a>"
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5002)

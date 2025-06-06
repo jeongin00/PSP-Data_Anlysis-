@@ -2,79 +2,357 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>데이트 위험도 예측</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>데이트 위험도 예측 & MBTI 매칭</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+
+    body {
+      background-color: #f5f5f5;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+      color: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .header h1 {
+      font-size: 2em;
+      margin-bottom: 10px;
+    }
+
+    .section {
+      background: white;
+      margin-bottom: 30px;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .section h2 {
+      color: #ff6b6b;
+      margin-bottom: 20px;
+      font-size: 1.5em;
+      border-bottom: 2px solid #ff6b6b;
+      padding-bottom: 10px;
+    }
+
+    form {
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #555;
+      font-weight: 500;
+    }
+
+    select, input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1em;
+      transition: border-color 0.3s ease;
+    }
+
+    select:focus, input:focus {
+      outline: none;
+      border-color: #ff6b6b;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1em;
+      font-weight: 500;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(255, 107, 107, 0.2);
+    }
+
+    .result-box {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      background-color: #f8f9fa;
+    }
+
+    .result-box h3 {
+      color: #ff6b6b;
+      margin-bottom: 10px;
+    }
+
+    .success {
+      background-color: #e8f5e9;
+      color: #2e7d32;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+
+    .error {
+      background-color: #ffebee;
+      color: #c62828;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+
+    .info-text {
+      color: #666;
+      font-size: 0.9em;
+      margin-top: 5px;
+    }
+
+    .mbti-result {
+      background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+
+    .mbti-result h3 {
+      color: #2e7d32;
+      margin-bottom: 15px;
+    }
+
+    .mbti-score {
+      font-size: 2em;
+      color: #2e7d32;
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 10px;
+      }
+      
+      .section {
+        padding: 15px;
+      }
+      
+      .header h1 {
+        font-size: 1.5em;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h2>데이트 위험도 예측기</h2>
+  <div class="container">
+    <div class="header">
+      <h1>데이트 위험도 예측 & MBTI 매칭</h1>
+      <p>안전하고 즐거운 데이트를 위한 당신의 파트너</p>
+    </div>
 
-  <form id="predict-form">
-    <label>날짜:
-      <input type="date" id="date" name="date">
-    </label><br><br>
+    <div class="section">
+      <h2>데이트 위험도 예측기</h2>
+      <form id="predict-form">
+        <div class="form-group">
+          <label>날짜</label>
+          <input type="date" id="date" name="date">
+        </div>
 
-    <label>구:
-      <select name="gu" id="gu">
-        <option>강남구</option>
-        <option>강동구</option>
-        <option>강북구</option>
-        <option>강서구</option>
-        <option>관악구</option>
-        <option>광진구</option>
-        <option>구로구</option>
-        <option>금천구</option>
-        <option>노원구</option>
-        <option>도봉구</option>
-        <option>동작구</option>
-        <option>마포구</option>
-        <option>서대문구</option>
-        <option>서초구</option>
-        <option>성동구</option>
-        <option>송파구</option>
-        <option>양천구</option>
-        <option>용산구</option>
-        <option>은평구</option>
-        <option>종로구</option>
-        <option>중구</option>
-        <option>중랑구</option>
-      </select>
-    </label><br><br>
+        <div class="form-group">
+          <label>지역</label>
+          <select name="gu" id="gu">
+            <option>강남구</option>
+            <option>강동구</option>
+            <option>강북구</option>
+            <option>강서구</option>
+            <option>관악구</option>
+            <option>광진구</option>
+            <option>구로구</option>
+            <option>금천구</option>
+            <option>노원구</option>
+            <option>도봉구</option>
+            <option>동작구</option>
+            <option>마포구</option>
+            <option>서대문구</option>
+            <option>서초구</option>
+            <option>성동구</option>
+            <option>송파구</option>
+            <option>양천구</option>
+            <option>용산구</option>
+            <option>은평구</option>
+            <option>종로구</option>
+            <option>중구</option>
+            <option>중랑구</option>
+          </select>
+        </div>
 
-    <label>MBTI:
-    <select name="mbti">
-        <option>INFP</option>
-        <option>INFJ</option>
-        <option>ISFP</option>
-        <option>ISFJ</option>
-        <option>INTP</option>
-        <option>INTJ</option>
-        <option>ISTP</option>
-        <option>ISTJ</option>
+        <div class="form-group">
+          <label>MBTI</label>
+          <select name="mbti">
+            <option>INFP</option>
+            <option>INFJ</option>
+            <option>ISFP</option>
+            <option>ISFJ</option>
+            <option>INTP</option>
+            <option>INTJ</option>
+            <option>ISTP</option>
+            <option>ISTJ</option>
+            <option>ENFP</option>
+            <option>ENFJ</option>
+            <option>ESFP</option>
+            <option>ESFJ</option>
+            <option>ENTP</option>
+            <option>ENTJ</option>
+            <option>ESTP</option>
+            <option>ESTJ</option>
+          </select>
+        </div>
 
-        <option>ENFP</option>
-        <option>ENFJ</option>
-        <option>ESFP</option>
-        <option>ESFJ</option>
-        <option>ENTP</option>
-        <option>ENTJ</option>
-        <option>ESTP</option>
-        <option>ESTJ</option>
-    </select>
-    </label><br><br>
+        <input type="hidden" id="day" name="day">
+        <input type="hidden" id="holiday" name="holiday">
 
-    <!-- 숨겨진 필드: 자동 계산된 요일 및 기념일 -->
-    <input type="hidden" id="day" name="day">
-    <input type="hidden" id="holiday" name="holiday">
+        <button type="submit">위험도 예측하기</button>
 
-    <button type="submit">위험도 예측</button>
-    <h3 id="result"></h3>
-    <p id="weather-info"></p>
-    <p id="day-message"></p> <!-- 요일 안내 -->
-    <label>지하철 역명:
-    <input type="text" id="station" name="station" placeholder="역명을 입력하세요" list="station-list" autocomplete="off">
-    <datalist id="station-list"></datalist>
-  </label><br><br>
-  </form>
-  <p id="subway-info"></p>
+        <div class="result-box">
+          <div id="result"></div>
+          <p id="weather-info"></p>
+          <p id="day-message"></p>
+        </div>
+
+        <div class="form-group">
+          <label>지하철 역명</label>
+          <input type="text" id="station" name="station" placeholder="역명을 입력하세요" list="station-list" autocomplete="off">
+          <datalist id="station-list"></datalist>
+          <p class="info-text">역명을 입력하고 Enter를 눌러 혼잡도 정보를 확인하세요</p>
+        </div>
+        <p id="subway-info"></p>
+      </form>
+    </div>
+
+    <div class="section">
+      <h2>MBTI 궁합 매칭</h2>
+      <form id="mbti-form" action="/mbti" method="POST">
+        <div class="form-group">
+          <label>내 MBTI</label>
+          <select name="my_mbti" required>
+            <option value="">선택하세요</option>
+            <option>INFP</option>
+            <option>INFJ</option>
+            <option>ISFP</option>
+            <option>ISFJ</option>
+            <option>INTP</option>
+            <option>INTJ</option>
+            <option>ISTP</option>
+            <option>ISTJ</option>
+            <option>ENFP</option>
+            <option>ENFJ</option>
+            <option>ESFP</option>
+            <option>ESFJ</option>
+            <option>ENTP</option>
+            <option>ENTJ</option>
+            <option>ESTP</option>
+            <option>ESTJ</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>내 성별</label>
+          <select name="my_gender" required>
+            <option value="">선택하세요</option>
+            <option value="MALE">남성</option>
+            <option value="FEMALE">여성</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>상대방 MBTI</label>
+          <select name="their_mbti" required>
+            <option value="">선택하세요</option>
+            <option>INFP</option>
+            <option>INFJ</option>
+            <option>ISFP</option>
+            <option>ISFJ</option>
+            <option>INTP</option>
+            <option>INTJ</option>
+            <option>ISTP</option>
+            <option>ISTJ</option>
+            <option>ENFP</option>
+            <option>ENFJ</option>
+            <option>ESFP</option>
+            <option>ESFJ</option>
+            <option>ENTP</option>
+            <option>ENTJ</option>
+            <option>ESTP</option>
+            <option>ESTJ</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>상대방 성별</label>
+          <select name="their_gender" required>
+            <option value="">선택하세요</option>
+            <option value="MALE">남성</option>
+            <option value="FEMALE">여성</option>
+          </select>
+        </div>
+
+        <button type="submit">궁합 확인하기</button>
+      </form>
+
+      {% if show_mbti_result %}
+      <div class="mbti-result">
+        <h3>궁합 결과</h3>
+        <div class="mbti-score">{{ mbti_success }}</div>
+        <form action="/mbti/feedback" method="POST">
+          <input type="hidden" name="my_mbti" value="{{ my_mbti }}">
+          <input type="hidden" name="my_gender" value="{{ my_gender }}">
+          <input type="hidden" name="their_mbti" value="{{ their_mbti }}">
+          <input type="hidden" name="their_gender" value="{{ their_gender }}">
+          <div class="form-group">
+            <label>실제 만남은 어땠나요?</label>
+            <select name="success" required>
+              <option value="5">최고</option>
+              <option value="4">좋음</option>
+              <option value="3">보통</option>
+              <option value="2">나쁨</option>
+              <option value="1">최악</option>
+            </select>
+          </div>
+          <button type="submit">피드백 제출하기</button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
   <script>
     const holidayMap = {
       "02-14": "발렌타인데이",
@@ -108,11 +386,11 @@
 
       const formData = new FormData(this);
       const data = {
-        date: formData.get("date"),         // 🔹 날짜 (날씨용)
-        day: formData.get("day"),           // 자동 설정된 요일
+        date: formData.get("date"),
+        day: formData.get("day"),
         gu: formData.get("gu"),
         mbti: formData.get("mbti"),
-        holiday: formData.get("holiday"),    // 자동 설정된 기념일
+        holiday: formData.get("holiday"),
       };
 
       const res = await fetch("/predict", {
@@ -122,29 +400,26 @@
       });
 
       const result = await res.json();
-      // ✅ 이때 요일 메시지를 보여준다
       document.getElementById("day-message").innerText = `${data.day}날 약속이 있으시군요!`;
       
-    // 예측 등급
-    document.getElementById("result").innerText = result.grade
-    ? `예측 등급: ${result.grade}`
-    : `오류: ${result.error}`;
+      document.getElementById("result").innerText = result.grade
+        ? `예측 등급: ${result.grade}`
+        : `오류: ${result.error}`;
 
-    // 🔹 날씨와 온도 정보 추가 출력
-    if (result.weather && result.temperature !== undefined) {
-    document.getElementById("weather-info").innerText =
-        `날씨: ${result.weather}, 온도: ${result.temperature}°C`;
-    } else {
-    document.getElementById("weather-info").innerText = "";
-    }
-    // 🔹 지하철 혼잡도 정보 출력
-    if (result.subway) {
-      document.getElementById("subway-info").innerText = result.subway;
-    } else {
-      document.getElementById("subway-info").innerText = "";
-    }
+      if (result.weather && result.temperature !== undefined) {
+        document.getElementById("weather-info").innerText =
+          `날씨: ${result.weather}, 온도: ${result.temperature}°C`;
+      } else {
+        document.getElementById("weather-info").innerText = "";
+      }
+
+      if (result.subway) {
+        document.getElementById("subway-info").innerText = result.subway;
+      } else {
+        document.getElementById("subway-info").innerText = "";
+      }
     });
-    // 페이지 로드 시 서버에서 역명 리스트 불러오기
+
     window.addEventListener("DOMContentLoaded", async () => {
       const res = await fetch("/stations");
       const result = await res.json();
@@ -158,6 +433,7 @@
         });
       }
     });
+
     document.getElementById("station").addEventListener("keydown", async function (e) {
       if (e.key === "Enter") {
         e.preventDefault();
@@ -176,7 +452,6 @@
         document.getElementById("subway-info").innerText = result.message || "정보 없음";
       }
     });
-
   </script>
 </body>
 </html>

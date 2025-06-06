@@ -6,6 +6,9 @@ import joblib
 import requests
 import datetime
 from model import MLP
+from collections import defaultdict
+import os
+import json
 
 app = Flask(__name__)
 
@@ -25,6 +28,64 @@ df_subway = pd.read_csv("지하철.csv")  # 요일, 역명 등 포함
 API_KEY = "870149e3ea42fccbd6ec5dff14fd193e"
 CITY = "Seoul"
 WEATHER_URL = f"http://api.openweathermap.org/data/2.5/forecast?q={CITY}&appid={API_KEY}&units=metric&lang=kr"
+
+# MBTI 관련 초기화
+male_pref = defaultdict(lambda: defaultdict(lambda: 0.5))
+female_pref = defaultdict(lambda: defaultdict(lambda: 0.5))
+
+# 기존 MBTI 데이터가 있다면 로드
+if os.path.exists("mbti/prefs_male.json"):
+    with open("mbti/prefs_male.json") as f:
+        male_data = json.load(f)
+        for k1 in male_data:
+            for k2 in male_data[k1]:
+                male_pref[k1][k2] = male_data[k1][k2]
+
+if os.path.exists("mbti/prefs_female.json"):
+    with open("mbti/prefs_female.json") as f:
+        female_data = json.load(f)
+        for k1 in female_data:
+            for k2 in female_data[k1]:
+                female_pref[k1][k2] = female_data[k1][k2]
+
+def update_pref(user_mbti, target_mbti, gender, success):
+    """
+    success: 1~5 정수 (1=최악, 5=최고)
+    """
+    prefs = male_pref if gender == "MALE" else female_pref
+    base = 0.1
+    current = prefs[user_mbti][target_mbti]
+
+    # 변화율 계산
+    adjustment_factor = {
+        5: +1.0,
+        4: +0.5,
+        3: 0.0,
+        2: -0.5,
+        1: -1.0
+    }[success]
+
+    dyn_adj = base * (1 - abs(current - 0.5)) * adjustment_factor
+    new_weight = current + dyn_adj
+    prefs[user_mbti][target_mbti] = round(min(0.8, max(0.2, new_weight)), 3)
+
+    # 저장
+    def to_dict(d): return {k: dict(v) for k, v in d.items()}
+    if gender == "MALE":
+        with open("mbti/prefs_male.json", "w") as f:
+            json.dump(to_dict(prefs), f, indent=2)
+    else:
+        with open("mbti/prefs_female.json", "w") as f:
+            json.dump(to_dict(prefs), f, indent=2)
+
+def get_pref(user_mbti, target_mbti, gender):
+    prefs = male_pref if gender == "MALE" else female_pref
+    return prefs[user_mbti][target_mbti]
+
+def calculate_match_success(m1, g1, m2, g2):
+    p1 = get_pref(m1, m2, g1)
+    p2 = get_pref(m2, m1, g2)
+    return round(min(p1, p2), 2)
 
 @app.route("/")
 def index():
@@ -69,8 +130,6 @@ def predict():
         # 정오(12시)와 가장 가까운 시간 선택
         _, weather_status, temperature = sorted(weather_candidates, key=lambda x: x[0])[0]
 
-
-
         # 🔹 3. 인코딩
         le = label_encoders
         X = [
@@ -96,6 +155,7 @@ def predict():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+
 @app.route("/stations")
 def get_stations():
     try:
@@ -107,6 +167,7 @@ def get_stations():
         return jsonify({"stations": stations})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 @app.route("/congestion", methods=["POST"])
 def congestion():
     data = request.get_json()
@@ -119,7 +180,7 @@ def congestion():
     if row.empty:
         return jsonify({"message": "혼잡도 정보 없음"})
 
-    time_slots = ['새벽', '출근', '오전', '점심', '오후', '퇴근', '저녁', '심야']
+    time_slots = ['6시이전', '06~09시', '09~12시', '12~13시', '13~16시', '16~19시', '19~22시', '22~24시']
     values = row.iloc[0][time_slots].values.astype(float)
     min_idx, max_idx = values.argmin(), values.argmax()
 
@@ -127,6 +188,47 @@ def congestion():
         "message": f"가장 한산한 시간대는 '{time_slots[min_idx]}', 가장 혼잡한 시간대는 '{time_slots[max_idx]}'입니다."
     })
 
+@app.route("/mbti", methods=["GET", "POST"])
+def mbti_match():
+    if request.method == "POST":
+        my_mbti = request.form.get("my_mbti")
+        my_gender = request.form.get("my_gender")
+        their_mbti = request.form.get("their_mbti")
+        their_gender = request.form.get("their_gender")
+
+        success = calculate_match_success(my_mbti, my_gender, their_mbti, their_gender)
+        return render_template(
+            "index.html",
+            mbti_success=success,
+            show_mbti_result=True,
+            my_mbti=my_mbti,
+            my_gender=my_gender,
+            their_mbti=their_mbti,
+            their_gender=their_gender
+        )
+    return render_template(
+        "index.html",
+        mbti_success=None,
+        show_mbti_result=False,
+        my_mbti="",
+        my_gender="",
+        their_mbti="",
+        their_gender=""
+    )
+
+@app.route("/mbti/feedback", methods=["POST"])
+def mbti_feedback():
+    my_mbti = request.form["my_mbti"]
+    my_gender = request.form["my_gender"]
+    their_mbti = request.form["their_mbti"]
+    their_gender = request.form["their_gender"]
+    feedback_success = int(request.form["success"])
+
+    # 양방향 가중치 업데이트
+    update_pref(my_mbti, their_mbti, my_gender, feedback_success)
+    update_pref(their_mbti, my_mbti, their_gender, feedback_success)
+
+    return "<h3>피드백 감사합니다! 가중치가 반영되었습니다.</h3><a href='/'>← 돌아가기</a>"
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
