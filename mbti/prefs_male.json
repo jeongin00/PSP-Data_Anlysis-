@@ -1,9 +1,14 @@
 {
   "INFP": {
-    "INFP": 0.766
+    "INFP": 0.8,
+    "INFJ": 0.497
   },
   "ISFP": {
     "INFJ": 0.55,
     "ISFJ": 0.5
+  },
+  "INFJ": {
+    "ISFP": 0.5,
+    "INFP": 0.55
   }
 }

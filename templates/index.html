@@ -183,11 +183,11 @@
       <form id="predict-form">
         <div class="form-group">
           <label>날짜</label>
-          <input type="date" id="date" name="date">
+          <input type="date" id="date" name="date" min="" max="">
         </div>
 
         <div class="form-group">
-          <label>지역</label>
+          <label>약속장소</label>
           <select name="gu" id="gu">
             <option>강남구</option>
             <option>강동구</option>
@@ -248,7 +248,7 @@
         </div>
 
         <div class="form-group">
-          <label>지하철 역명</label>
+          <label>이용할 지하철역</label>
           <input type="text" id="station" name="station" placeholder="역명을 입력하세요" list="station-list" autocomplete="off">
           <datalist id="station-list"></datalist>
           <p class="info-text">역명을 입력하고 Enter를 눌러 혼잡도 정보를 확인하세요</p>
@@ -331,7 +331,15 @@
       <div class="mbti-result">
         <h3>궁합 결과</h3>
         <div class="mbti-score">{{ mbti_success }}</div>
-        <form action="/mbti/feedback" method="POST">
+        <h3>궁합 점수: {{ mbti_success }} / 1.0</h3>
+        {% if mbti_success >= 0.7 %}
+          <p>❤️ 정말 잘 맞는 궁합이에요!</p>
+        {% elif mbti_success >= 0.5 %}
+          <p>😊 무난한 궁합입니다.</p>
+        {% else %}
+          <p>🤔 약간 노력 필요한 조합일 수도 있어요.</p>
+        {% endif %}
+        <form id="feedback-form" action="/mbti/feedback" method="POST">
           <input type="hidden" name="my_mbti" value="{{ my_mbti }}">
           <input type="hidden" name="my_gender" value="{{ my_gender }}">
           <input type="hidden" name="their_mbti" value="{{ their_mbti }}">
@@ -339,11 +347,11 @@
           <div class="form-group">
             <label>실제 만남은 어땠나요?</label>
             <select name="success" required>
-              <option value="5">최고</option>
-              <option value="4">좋음</option>
-              <option value="3">보통</option>
-              <option value="2">나쁨</option>
-              <option value="1">최악</option>
+              <option value="5">😍 최고예요</option>
+              <option value="4">😊 꽤 좋아요</option>
+              <option value="3">😐 보통이에요</option>
+              <option value="2">😕 별로였어요</option>
+              <option value="1">😡 최악이에요</option>
             </select>
           </div>
           <button type="submit">피드백 제출하기</button>
@@ -353,7 +361,38 @@
     </div>
   </div>
 
+  <!-- Feedback Modal -->
+  <div id="feedbackModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
+    <div class="modal-content" style="background-color: white; margin: 15% auto; padding: 20px; border-radius: 15px; width: 80%; max-width: 500px;">
+      <h3 style="color: #ff6b6b; margin-bottom: 20px;">피드백 제출 완료</h3>
+      <p style="margin-bottom: 20px;">소중한 피드백 감사합니다!</p>
+      <button type="button" id="closeModalBtn" style="background: linear-gradient(135deg, #ff6b6b, #ff8e8e); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">닫기</button>
+    </div>
+  </div>
+
   <script>
+    // Set date input min and max values
+    function setDateRange() {
+      const today = new Date();
+      const maxDate = new Date();
+      maxDate.setDate(today.getDate() + 5); // 5 days from today
+
+      // Format dates to YYYY-MM-DD
+      const formatDate = (date) => {
+        return date.toISOString().split('T')[0];
+      };
+
+      const dateInput = document.getElementById('date');
+      dateInput.min = formatDate(today);
+      dateInput.max = formatDate(maxDate);
+    }
+
+    // Call setDateRange when page loads
+    window.onload = function() {
+      setDateRange();
+      // ... existing onload code ...
+    };
+
     const holidayMap = {
       "02-14": "발렌타인데이",
       "03-01": "삼일절",
@@ -452,6 +491,59 @@
         document.getElementById("subway-info").innerText = result.message || "정보 없음";
       }
     });
+
+    // Add feedback form submission handler
+    document.getElementById('feedback-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      
+      try {
+        const response = await fetch('/mbti/feedback', {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (response.ok) {
+          showModal();
+          // Reset the form after successful submission
+          this.reset();
+        } else {
+          console.error('Error submitting feedback');
+        }
+      } catch (error) {
+        console.error('Error submitting feedback:', error);
+      }
+    });
+
+    // Scroll to bottom when MBTI results are shown
+    if (document.querySelector('.mbti-result')) {
+      window.onload = function() {
+        window.scrollTo(0, document.body.scrollHeight);
+      };
+    }
+
+    function showModal() {
+      document.getElementById('feedbackModal').style.display = 'block';
+    }
+
+    function closeModal() {
+      document.getElementById('feedbackModal').style.display = 'none';
+      window.location.href = '/';  // Redirect to home page
+    }
+
+    // Add event listener for close button
+    document.getElementById('closeModalBtn').addEventListener('click', function(e) {
+      e.preventDefault();
+      closeModal();
+    });
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      const modal = document.getElementById('feedbackModal');
+      if (event.target == modal) {
+        closeModal();
+      }
+    }
   </script>
 </body>
 </html>
